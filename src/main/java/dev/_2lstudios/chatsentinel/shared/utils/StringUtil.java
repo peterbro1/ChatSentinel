@@ -1,11 +1,12 @@
 package dev._2lstudios.chatsentinel.shared.utils;
 
 import java.text.Normalizer;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class StringUtil {
-    public static String sanitize(final String name) {
-        return name.replaceAll("[^a-zA-Z0-9]", "");
-	}
 
     public static String removeAccents(String message) {
 		/*
@@ -25,4 +26,19 @@ public class StringUtil {
 
 		return new String(out).replace("(punto)", ".").replace("(dot)", ".").trim();
 	}
+	public static HashMap<Pattern,String> getPairs(String[] messages){
+    	HashMap<Pattern,String> _map = new HashMap<>();
+    	for (String message : messages) {
+			String[] pairs = message.split("===");
+			try{
+				_map.put(Pattern.compile(pairs[0]),pairs[1]);
+			}catch (Exception e){
+				System.out.println("[ChatSentinel ERROR] " + e.getMessage());
+				continue;
+			}
+		}
+    	return _map;
+
+	}
+
 }

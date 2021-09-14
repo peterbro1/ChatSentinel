@@ -19,6 +19,7 @@ langs:
     cooldown_warn_message: "&c&lCS: &cWait %cooldown%s before sending another message!"
     flood_warn_message: "&c&lCS: &cYou cant send too large messages!"
     syntax_warn_message: "&c&lCS: &cSyntax is disabled in this server!"
+    purple_warn_message: ""
   es:
     cleared: "&aEl chat fue limpiado por &b%player%&a!"
     reload: "&c&lCS: &aPlugin recargado correctamente!"

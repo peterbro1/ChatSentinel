@@ -4,9 +4,10 @@ import java.util.Collection;
 
 public class GeneralModule {
 	private Collection<String> commands;
-
-	public void loadData(final Collection<String> commands) {
+	private boolean msg_enabled;
+	public void loadData(final Collection<String> commands, boolean msgs) {
 		this.commands = commands;
+		msg_enabled = msgs;
 	}
 
 	public boolean isCommand(final String message) {
@@ -16,5 +17,9 @@ public class GeneralModule {
 		}
 
 		return false;
+	}
+
+	public boolean msgEnabled(){
+		return this.msg_enabled;
 	}
 }

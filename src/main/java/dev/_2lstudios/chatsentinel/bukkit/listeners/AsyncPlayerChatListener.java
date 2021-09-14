@@ -1,9 +1,17 @@
 package dev._2lstudios.chatsentinel.bukkit.listeners;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import dev._2lstudios.chatsentinel.bukkit.ChatSentinel;
+import dev._2lstudios.chatsentinel.shared.modules.*;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.chat.BaseComponentSerializer;
+import net.md_5.bungee.chat.TextComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,12 +24,6 @@ import dev._2lstudios.chatsentinel.bukkit.modules.ModuleManager;
 import dev._2lstudios.chatsentinel.shared.chat.ChatPlayer;
 import dev._2lstudios.chatsentinel.shared.chat.ChatPlayerManager;
 import dev._2lstudios.chatsentinel.shared.interfaces.Module;
-import dev._2lstudios.chatsentinel.shared.modules.BlacklistModule;
-import dev._2lstudios.chatsentinel.shared.modules.CapsModule;
-import dev._2lstudios.chatsentinel.shared.modules.CooldownModule;
-import dev._2lstudios.chatsentinel.shared.modules.FloodModule;
-import dev._2lstudios.chatsentinel.shared.modules.MessagesModule;
-import dev._2lstudios.chatsentinel.shared.modules.WhitelistModule;
 import dev._2lstudios.chatsentinel.shared.utils.StringUtil;
 import dev._2lstudios.chatsentinel.shared.utils.VersionUtil;
 
@@ -41,7 +43,10 @@ public class AsyncPlayerChatListener implements Listener {
 	public void onAsyncPlayerChat(final AsyncPlayerChatEvent event) {
 		final Player player = event.getPlayer();
 
-		if (!player.hasPermission("chatsentinel.bypass")) {
+		if (player.hasPermission("chatsentinel.bypass"))
+			return;
+
+
 			final UUID uuid = player.getUniqueId();
 			final ChatPlayer chatPlayer = chatPlayerManager.getPlayer(uuid);
 			final String message = event.getMessage().trim();
@@ -70,17 +75,26 @@ public class AsyncPlayerChatListener implements Listener {
 							{ "%player%", "%message%", "%warns%", "%maxwarns%", "%cooldown%" }, { playerName, message,
 									String.valueOf(warns), String.valueOf(module.getMaxWarns()), String.valueOf(0) } };
 
+
+
+
 					if (module instanceof BlacklistModule) {
 						final BlacklistModule blacklistModule = (BlacklistModule) module;
-
+						chatPlayer.addLastMessage(modifiedMessage,System.currentTimeMillis());
 						if (blacklistModule.isFakeMessage()) {
 							recipients.removeIf(player1 -> player1 != player);
 						} else if (blacklistModule.isHideWords()) {
-							event.setMessage(blacklistModule.getPattern().matcher(modifiedMessage).replaceAll("***"));
+							event.setMessage(blacklistModule.getPattern().matcher(modifiedMessage).replaceAll(blacklistModule.getRandomReplaceWord()));
 						} else {
 							event.setCancelled(true);
 						}
-					} else if (module instanceof CapsModule) {
+					} else if (module instanceof PurpleModule){
+						final PurpleModule pmod = (PurpleModule) module;
+						Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin,
+								() -> {player.sendMessage(pmod.getReturnString(message));},
+								1);
+						break;
+					}else if (module instanceof CapsModule) {
 						final CapsModule capsModule = (CapsModule) module;
 
 						if (capsModule.isReplace()) {
@@ -145,6 +159,6 @@ public class AsyncPlayerChatListener implements Listener {
 			if (!event.isCancelled()) {
 				chatPlayer.addLastMessage(modifiedMessage, System.currentTimeMillis());
 			}
-		}
+
 	}
 }

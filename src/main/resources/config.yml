@@ -79,6 +79,8 @@ cooldown:
     normal: 1000
     command: 400
 
+  msgs: false
+
 # Checks if player is using too many repeated characters.
 flood:
   enabled: true
@@ -126,3 +128,6 @@ syntax:
   # You need a mute plugin for ChatSentinel to mute players. (Recommended: LiteBans/AdvancedBans)
   # Set to [] to disable this feature completely.
   punishments: []
+
+purple:
+  enabled: true

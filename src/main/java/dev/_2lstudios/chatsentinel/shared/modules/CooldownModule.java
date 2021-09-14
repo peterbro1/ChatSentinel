@@ -22,6 +22,7 @@ public class CooldownModule implements Module {
 			final long timeToWait;
 
 			if (message.startsWith("/")) {
+
 				timeToWait = this.commandTime;
 			} else if (chatPlayer.isLastMessage(message) && lastMessageTime < this.repeatTime) {
 				timeToWait = this.repeatTime;

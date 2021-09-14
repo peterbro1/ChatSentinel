@@ -3,6 +3,7 @@ package dev._2lstudios.chatsentinel.bukkit.listeners;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import dev._2lstudios.chatsentinel.shared.modules.*;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,14 +16,6 @@ import dev._2lstudios.chatsentinel.bukkit.modules.ModuleManager;
 import dev._2lstudios.chatsentinel.shared.chat.ChatPlayer;
 import dev._2lstudios.chatsentinel.shared.chat.ChatPlayerManager;
 import dev._2lstudios.chatsentinel.shared.interfaces.Module;
-import dev._2lstudios.chatsentinel.shared.modules.BlacklistModule;
-import dev._2lstudios.chatsentinel.shared.modules.CapsModule;
-import dev._2lstudios.chatsentinel.shared.modules.CooldownModule;
-import dev._2lstudios.chatsentinel.shared.modules.FloodModule;
-import dev._2lstudios.chatsentinel.shared.modules.GeneralModule;
-import dev._2lstudios.chatsentinel.shared.modules.MessagesModule;
-import dev._2lstudios.chatsentinel.shared.modules.SyntaxModule;
-import dev._2lstudios.chatsentinel.shared.modules.WhitelistModule;
 import dev._2lstudios.chatsentinel.shared.utils.StringUtil;
 import dev._2lstudios.chatsentinel.shared.utils.VersionUtil;
 
@@ -38,7 +31,7 @@ public class ServerCommandListener implements Listener {
 		this.chatPlayerManager = chatPlayerManager;
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onServerCommand(final PlayerCommandPreprocessEvent event) {
 		final Player player = event.getPlayer();
 
@@ -52,11 +45,10 @@ public class ServerCommandListener implements Listener {
 			String modifiedMessage;
 
 			modifiedMessage = StringUtil.removeAccents(originalMessage);
-
 			if (originalMessage.contains(" ")) {
-				if (isNormalCommand) {
-					modifiedMessage = modifiedMessage.replace("/", "");
-				}
+				/*if (isNormalCommand)
+					modifiedMessage = modifiedMessage.replace("/", "");*/
+
 			} else {
 				modifiedMessage = "/";
 			}
@@ -71,9 +63,8 @@ public class ServerCommandListener implements Listener {
 			final Server server = plugin.getServer();
 			final String playerName = player.getName();
 			final String lang = VersionUtil.getLocale(player);
-
 			for (final Module module : moduleManager.getModules()) {
-				if (!player.hasPermission("chatsentinel.bypass." + module.getName())
+					if (!player.hasPermission("chatsentinel.bypass." + module.getName())
 						&& (module instanceof CooldownModule || module instanceof SyntaxModule || isNormalCommand)
 						&& module.meetsCondition(chatPlayer, modifiedMessage)) {
 					final int warns = chatPlayer.addWarn(module), maxWarns = module.getMaxWarns();
@@ -82,13 +73,15 @@ public class ServerCommandListener implements Listener {
 							{ playerName, originalMessage, String.valueOf(warns), String.valueOf(module.getMaxWarns()),
 									String.valueOf(0) } };
 
+
 					if (module instanceof BlacklistModule) {
 						final BlacklistModule blacklistModule = (BlacklistModule) module;
-
 						if (blacklistModule.isHideWords()) {
-							event.setMessage(blacklistModule.getPattern().matcher(modifiedMessage).replaceAll("***"));
+							event.setMessage(blacklistModule.getPattern().matcher(originalMessage).replaceAll(blacklistModule.getRandomReplaceWord()));
+
 						} else
 							event.setCancelled(true);
+
 					} else if (module instanceof CapsModule) {
 						final CapsModule capsModule = (CapsModule) module;
 
@@ -113,7 +106,9 @@ public class ServerCommandListener implements Listener {
 								event.setCancelled(true);
 						} else
 							event.setCancelled(true);
-					} else
+					} else if (module instanceof PurpleModule){
+						continue;
+					}else
 						event.setCancelled(true);
 
 					final String notificationMessage = module.getWarnNotification(placeholders);

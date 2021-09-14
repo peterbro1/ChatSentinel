@@ -33,3 +33,8 @@ expressions:
   - pussy
   # Miscelaneous
   - (LiquidBounce)([ ])(Hacked)([ ])(Client)([ ])(by)([ ])(CCBlueX)
+
+replace_words:
+  - unicorn
+  - fairy
+  - dogman

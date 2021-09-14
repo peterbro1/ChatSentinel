@@ -1,5 +1,6 @@
 package dev._2lstudios.chatsentinel.shared.modules;
 
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import dev._2lstudios.chatsentinel.shared.chat.ChatPlayer;
@@ -13,9 +14,10 @@ public class BlacklistModule implements Module {
 	private String warnNotification;
 	private String[] commands;
 	private Pattern pattern;
+	private String[] replaceWords;
 
 	public void loadData(final boolean enabled, final boolean fakeMessage, final boolean hideWords, final int maxWarns,
-			final String warnNotification, final String[] commands, final String[] patterns) {
+			final String warnNotification, final String[] commands, final String[] patterns, final String[] replaceWords) {
 		this.enabled = enabled;
 		this.fakeMessage = fakeMessage;
 		this.hideWords = hideWords;
@@ -23,6 +25,15 @@ public class BlacklistModule implements Module {
 		this.warnNotification = warnNotification;
 		this.commands = commands;
 		this.pattern = PatternUtil.compile(patterns);
+		this.replaceWords = replaceWords;
+	}
+
+	public String[] getReplaceWords(){
+		return this.replaceWords;
+	}
+
+	public String getRandomReplaceWord(){
+		return this.replaceWords[new Random().nextInt(this.replaceWords.length)];
 	}
 
 	public boolean isFakeMessage() {

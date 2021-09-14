@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import dev._2lstudios.chatsentinel.shared.modules.*;
+import dev._2lstudios.chatsentinel.shared.utils.StringUtil;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
@@ -12,14 +14,6 @@ import org.bukkit.entity.Player;
 
 import dev._2lstudios.chatsentinel.bukkit.utils.ConfigUtil;
 import dev._2lstudios.chatsentinel.shared.interfaces.Module;
-import dev._2lstudios.chatsentinel.shared.modules.BlacklistModule;
-import dev._2lstudios.chatsentinel.shared.modules.CapsModule;
-import dev._2lstudios.chatsentinel.shared.modules.CooldownModule;
-import dev._2lstudios.chatsentinel.shared.modules.FloodModule;
-import dev._2lstudios.chatsentinel.shared.modules.MessagesModule;
-import dev._2lstudios.chatsentinel.shared.modules.SyntaxModule;
-import dev._2lstudios.chatsentinel.shared.modules.WhitelistModule;
-import dev._2lstudios.chatsentinel.shared.modules.GeneralModule;
 
 public class ModuleManager {
 	private final Server server;
@@ -33,19 +27,22 @@ public class ModuleManager {
 	private final BlacklistModule blacklistModule;
 	private final SyntaxModule syntaxModule;
 	private final WhitelistModule whitelistModule;
+	private final PurpleModule purpleModule;
 
 	public ModuleManager(final Server server, final ConfigUtil configUtil) {
 		this.server = server;
 		this.configUtil = configUtil;
-		this.modules = new Module[5];
+		this.modules = new Module[6];
 		this.modules[0] = this.capsModule = new CapsModule();
 		this.modules[1] = this.cooldownModule = new CooldownModule();
 		this.modules[2] = this.floodModule = new FloodModule();
 		this.modules[3] = this.blacklistModule = new BlacklistModule();
 		this.modules[4] = this.syntaxModule = new SyntaxModule();
+		this.modules[5] = this.purpleModule = new PurpleModule();
 		this.messagesModule = new MessagesModule();
 		this.generalModule = new GeneralModule();
 		this.whitelistModule = new WhitelistModule();
+		//this.purpleModule = new PurpleModule();
 
 		reloadData();
 	}
@@ -83,11 +80,13 @@ public class ModuleManager {
 		configUtil.create("%datafolder%/messages.yml");
 		configUtil.create("%datafolder%/whitelist.yml");
 		configUtil.create("%datafolder%/blacklist.yml");
+		configUtil.create("%datafolder%/purple.yml");
 
 		final Configuration blacklistYml = configUtil.get("%datafolder%/blacklist.yml");
 		final Configuration configYml = configUtil.get("%datafolder%/config.yml");
 		final Configuration messagesYml = configUtil.get("%datafolder%/messages.yml");
 		final Configuration whitelistYml = configUtil.get("%datafolder%/whitelist.yml");
+		final Configuration purpleYml = configUtil.get("%datafolder%/purple.yml");
 		final Map<String, Map<String, String>> locales = new HashMap<>();
 		final Collection<String> playerNames = new HashSet<>();
 
@@ -119,17 +118,21 @@ public class ModuleManager {
 				configYml.getString("flood.warn.notification"),
 				configYml.getStringList("flood.punishments").toArray(new String[0]));
 		this.messagesModule.loadData(messagesYml.getString("default"), locales);
-		this.generalModule.loadData(configYml.getStringList("general.commands"));
+		this.generalModule.loadData(configYml.getStringList("general.commands"), configYml.getBoolean("cooldown.msgs"));
 		this.whitelistModule.loadData(configYml.getBoolean("whitelist.enabled"),
 				whitelistYml.getStringList("expressions").toArray(new String[0]));
 		this.blacklistModule.loadData(configYml.getBoolean("blacklist.enabled"),
 				configYml.getBoolean("blacklist.fake_message"), configYml.getBoolean("blacklist.hide_words"),
 				configYml.getInt("blacklist.warn.max"), configYml.getString("blacklist.warn.notification"),
 				configYml.getStringList("blacklist.punishments").toArray(new String[0]),
-				blacklistYml.getStringList("expressions").toArray(new String[0]));
+				blacklistYml.getStringList("expressions").toArray(new String[0]),
+				blacklistYml.getStringList("replace_words").toArray(new String[0]));
 		this.syntaxModule.loadData(configYml.getBoolean("syntax.enabled"), configYml.getInt("syntax.warn.max"),
 				configYml.getString("syntax.warn.notification"),
 				configYml.getStringList("syntax.whitelist").toArray(new String[0]),
 				configYml.getStringList("syntax.punisments").toArray(new String[0]));
+		this.purpleModule.loadData(configYml.getBoolean("purple.enabled"),
+				StringUtil.getPairs(purpleYml.getStringList("help_messages.keypair").toArray(new String[0])));
+
 	}
 }

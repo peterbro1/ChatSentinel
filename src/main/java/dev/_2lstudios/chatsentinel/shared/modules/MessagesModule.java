@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import dev._2lstudios.chatsentinel.shared.utils.PlaceholderUtil;
+import org.bukkit.Bukkit;
 
 public class MessagesModule {
 	private Map<String, Map<String, String>> locales;
